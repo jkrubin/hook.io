@@ -12,7 +12,7 @@ hookM.persist(config.couch);
 var services = Object.keys(hooks.services);
 services = services.reverse();
 //services = [services[0]]
-process.exit()
+
 function addHook () {
   if (services.length === 0) {
     console.log('done'.magenta);
