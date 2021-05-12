@@ -19,7 +19,7 @@ const redis = {
 
 const couch = {
   "username": "admin",
-  "password": "password",
+  "password": "pass",
   "port": 5984,
   "host": "0.0.0.0"
 };

@@ -1,5 +1,4 @@
 let colors = require('colors');
-let user = require('../../lib/resources/user');
 let worker = require('../../lib/worker/worker');
 let tap = require('tape');
 let config = require('../config');
@@ -9,9 +8,15 @@ let hooks = require('microcule-examples');
 let http = require('axios');
 var baseURL = config.baseUrl;
 
+const util = require ('util')
+
 var r = require('../lib/helpers/_request');
 var examples = require('microcule-examples');
 var async = require('async');
+
+let user = require('../../lib/resources/user');
+const createUser = util.promisify(user.create);
+const find = util.promisify(user.find);
 
 
 let echoTest = async() =>{
@@ -26,27 +31,37 @@ let echoTest = async() =>{
 
   //Create test users 
   console.log('Creating test users'.green);
-  try{
-    await createTestUsers();
-  }catch(err){
-    console.log(err);
-  }
+  tap.test('Create Users', async(t)=>{
+    try{
+      let created = await createUser({
+        name: 'examples',
+        email: 'examples@marak.com',
+      });
+      if(created.id){
+        t.pass('user created');
+      }
+    }catch(err){
+      t.err(err, 'no error');
+      console.log(err);
+    }
+  });
   console.log('Test users Created'.blue);
   
-  //Create Webhook Echo 
-  console.log('Creating Echo service'.green);
-  var newHook = hooks.services['echo'];
-  if (typeof newHook.mschema === 'object' && Object.keys(newHook.mschema).length > 0) {
-    newHook.mschemaStatus = 'enabled';
-  }
+  //Delete test users 
+  // //Create Webhook Echo 
+  // console.log('Creating Echo service'.green);
+  // var newHook = hooks.services['echo'];
+  // if (typeof newHook.mschema === 'object' && Object.keys(newHook.mschema).length > 0) {
+  //   newHook.mschemaStatus = 'enabled';
+  // }
 
-  hookM.create(newHook, (err, res)=>{
-    if(err) {
-      throw err;
-    }
-    console.log('created'.green, newHook.name);
-    // iterate
-  });
+  // hookM.create(newHook, (err, res)=>{
+  //   if(err) {
+  //     throw err;
+  //   }
+  //   console.log('created'.green, newHook.name);
+  //   // iterate
+  // });
 
   //  let echoHook = await hookM.create(newHook, function(err, res){
   // if(err) {
@@ -56,15 +71,15 @@ let echoTest = async() =>{
   //  });
 
   //Run Webhook Tests
-  tap.test('get the echo hook', async(t)=>{
-    try{
-      let getRes = await http.get(`${baseURL}/examples/echo`);
+  // tap.test('get the echo hook', async(t)=>{
+  //   try{
+  //     let getRes = await http.get(`${baseURL}/examples/echo`);
 
-    }catch(err){
-      t.error(err, 'did not error');
-    }
-    t.end();
-  });
+  //   }catch(err){
+  //     t.error(err, 'did not error');
+  //   }
+  //   t.end();
+  // });
   //Run Cleanup 
 
   //Destroy user 
@@ -74,4 +89,5 @@ let echoTest = async() =>{
   //process.exit()
 
 };
+
 echoTest();
