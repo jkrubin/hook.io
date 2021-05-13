@@ -2,7 +2,6 @@ let colors = require('colors');
 let worker = require('../../lib/worker/worker');
 let tap = require('tape');
 let config = require('../config');
-let {createTestUsers} = require('../helpers');
 let hookM = require('../../lib/resources/hook');
 let hooks = require('microcule-examples');
 let http = require('axios');
@@ -10,14 +9,11 @@ var baseURL = config.baseUrl;
 
 const util = require ('util')
 
-var r = require('../lib/helpers/_request');
 var examples = require('microcule-examples');
-var async = require('async');
 
 let user = require('../../lib/resources/user');
 const createUser = util.promisify(user.create);
-const find = util.promisify(user.find);
-
+const findUser = util.promisify(user.findOne);
 
 let echoTest = async() =>{
   //Start Worker node 
@@ -39,15 +35,35 @@ let echoTest = async() =>{
       });
       if(created.id){
         t.pass('user created');
+      }else{
+        t.fail('no user created');
       }
+      t.end();
     }catch(err){
-      t.err(err, 'no error');
-      console.log(err);
+      t.fail(err);
+      t.end();
     }
   });
   console.log('Test users Created'.blue);
   
   //Delete test users 
+  console.log('Deleting Test users'.green);
+
+  tap.test('Delete Users', async(t)=>{
+    console.log('entering delete');
+    try{
+      console.log('finding users');
+      let tmpUser = await findUser({ name: 'examples' });
+      let res = await tmpUser.destroy();
+      console.log(res);
+      t.pass('user destroyed');
+      t.end();
+    }catch(err){
+      t.fail(err);
+      t.end();
+    }
+  });
+  console.log('Users Deleted'.blue);
   // //Create Webhook Echo 
   // console.log('Creating Echo service'.green);
   // var newHook = hooks.services['echo'];
